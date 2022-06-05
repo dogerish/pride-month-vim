@@ -1,22 +1,23 @@
 hi TabLine    term=underline cterm=reverse gui=reverse
-let g:rainbowStatus = 0
-let g:rainbowColors = [[]]
+let s:rainbowStatus = 0
+let s:rainbowColors = [[]]
 let i = 0
 for line in readfile(expand('<sfile>:p:h') . '/pride-month-colors.vim')
-	if (strlen(line) == 0) || (line[0:1] == '"#')
+	if strlen(line) == 0 || line[0:1] == '"#'
 		continue
 	elseif line == '" NEXT'
 		let i += 1
-		let g:rainbowColors = add(g:rainbowColors, [])
+		call add(s:rainbowColors, [])
 		continue
 	endif
-	let g:rainbowColors[i] = add(g:rainbowColors[i], line)
+	call add(s:rainbowColors[i], line)
 endfor
 func AlternateColors(timer)
-	for line in g:rainbowColors[g:rainbowStatus % len(g:rainbowColors)]
+	for line in s:rainbowColors[s:rainbowStatus]
 		exe line
 	endfor
-	let g:rainbowStatus += 1
+	let s:rainbowStatus = (s:rainbowStatus + 1) % len(s:rainbowColors)
 endfunc
-let g:rainbowTimer = timer_start(500, 'AlternateColors', {'repeat': -1})
-command RainbowStop exe timer_stop(g:rainbowTimer)
+call AlternateColors(0)
+let s:rainbowTimer = timer_start(500, 'AlternateColors', {'repeat': -1})
+command RainbowStop call timer_stop(s:rainbowTimer) | hi clear
